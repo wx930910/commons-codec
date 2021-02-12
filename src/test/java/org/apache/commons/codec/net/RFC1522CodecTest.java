@@ -23,6 +23,10 @@ import static org.junit.Assert.fail;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.DecoderException;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.ArgumentCaptor;
+import static org.mockito.Mockito.*;
+import org.apache.commons.codec.net.RFC1522Codec;
 
 /**
  * RFC 1522 compliant codec test cases
@@ -30,56 +34,51 @@ import org.junit.Test;
  */
 public class RFC1522CodecTest {
 
-    static class RFC1522TestCodec extends RFC1522Codec {
+	public static RFC1522Codec mockRFC1522Codec1() throws Exception {
+		RFC1522Codec mockInstance = spy(RFC1522Codec.class);
+		doAnswer((stubInvo) -> {
+			byte[] bytes = stubInvo.getArgument(0);
+			return bytes;
+		}).when(mockInstance).doDecoding(any());
+		doAnswer((stubInvo) -> {
+			byte[] bytes = stubInvo.getArgument(0);
+			return bytes;
+		}).when(mockInstance).doEncoding(any());
+		doReturn("T").when(mockInstance).getEncoding();
+		return mockInstance;
+	}
 
-        @Override
-        protected byte[] doDecoding(final byte[] bytes) {
-            return bytes;
-        }
+	@Test
+	public void testNullInput() throws Exception {
+		final RFC1522Codec testcodec = RFC1522CodecTest.mockRFC1522Codec1();
+		assertNull(testcodec.decodeText(null));
+		assertNull(testcodec.encodeText(null, CharEncoding.UTF_8));
+	}
 
-        @Override
-        protected byte[] doEncoding(final byte[] bytes) {
-            return bytes;
-        }
+	private void assertExpectedDecoderException(final String s) throws Exception {
+		final RFC1522Codec testcodec = RFC1522CodecTest.mockRFC1522Codec1();
+		try {
+			testcodec.decodeText(s);
+			fail("DecoderException should have been thrown");
+		} catch (final DecoderException e) {
+			// Expected.
+		}
+	}
 
-        @Override
-        protected String getEncoding() {
-            return "T";
-        }
-
-    }
-
-    @Test
-    public void testNullInput() throws Exception {
-        final RFC1522TestCodec testcodec = new RFC1522TestCodec();
-        assertNull(testcodec.decodeText(null));
-        assertNull(testcodec.encodeText(null, CharEncoding.UTF_8));
-    }
-
-    private void assertExpectedDecoderException(final String s) throws Exception {
-        final RFC1522TestCodec testcodec = new RFC1522TestCodec();
-        try {
-            testcodec.decodeText(s);
-            fail("DecoderException should have been thrown");
-        } catch (final DecoderException e) {
-            // Expected.
-        }
-    }
-
-    @Test
-    public void testDecodeInvalid() throws Exception {
-        assertExpectedDecoderException("whatever");
-        assertExpectedDecoderException("=?");
-        assertExpectedDecoderException("?=");
-        assertExpectedDecoderException("==");
-        assertExpectedDecoderException("=??=");
-        assertExpectedDecoderException("=?stuff?=");
-        assertExpectedDecoderException("=?UTF-8??=");
-        assertExpectedDecoderException("=?UTF-8?stuff?=");
-        assertExpectedDecoderException("=?UTF-8?T?stuff");
-        assertExpectedDecoderException("=??T?stuff?=");
-        assertExpectedDecoderException("=?UTF-8??stuff?=");
-        assertExpectedDecoderException("=?UTF-8?W?stuff?=");
-    }
+	@Test
+	public void testDecodeInvalid() throws Exception {
+		assertExpectedDecoderException("whatever");
+		assertExpectedDecoderException("=?");
+		assertExpectedDecoderException("?=");
+		assertExpectedDecoderException("==");
+		assertExpectedDecoderException("=??=");
+		assertExpectedDecoderException("=?stuff?=");
+		assertExpectedDecoderException("=?UTF-8??=");
+		assertExpectedDecoderException("=?UTF-8?stuff?=");
+		assertExpectedDecoderException("=?UTF-8?T?stuff");
+		assertExpectedDecoderException("=??T?stuff?=");
+		assertExpectedDecoderException("=?UTF-8??stuff?=");
+		assertExpectedDecoderException("=?UTF-8?W?stuff?=");
+	}
 
 }
