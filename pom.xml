@@ -210,6 +210,13 @@ limitations under the License.
   </contributors>
   <!-- Codec only has test dependencies ATM -->
   <dependencies>
+	<!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+	<dependency>
+	    <groupId>org.mockito</groupId>
+	    <artifactId>mockito-core</artifactId>
+	    <version>3.9.0</version>
+	    <scope>test</scope>
+	</dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
